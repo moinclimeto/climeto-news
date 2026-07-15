@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Reach | India Content Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="toast" class="toast"></div>
+
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <h1>Agent Reach</h1>
+                <p class="subtitle">India Content Hub</p>
+            </div>
+            <div class="header-actions">
+                <button id="fetch-btn" class="btn primary-btn">
+                    <span class="btn-text">Fetch Latest Data</span>
+                </button>
+                <button id="settings-btn" class="btn secondary-btn">⚙️ Settings</button>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-badge twitter-badge">
+                <span class="icon">𝕏</span>
+                <span id="tw-count">0</span> Posts
+            </div>
+            <div class="stat-badge linkedin-badge">
+                <span class="icon">in</span>
+                <span id="li-count">0</span> Posts
+            </div>
+        </div>
+
+        <main class="main-content">
+            <div class="column twitter-column">
+                <div class="column-header">
+                    <h2>Twitter Pulse</h2>
+                    <div class="glow-line"></div>
+                </div>
+                <div id="twitter-feed" class="feed">
+                    <div class="loading">Loading Twitter Data...</div>
+                </div>
+            </div>
+
+            <div class="column linkedin-column">
+                <div class="column-header">
+                    <h2>LinkedIn Insights</h2>
+                    <div class="glow-line"></div>
+                </div>
+                <div id="linkedin-feed" class="feed">
+                    <div class="loading">Loading LinkedIn Data...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h2>Authentication Settings</h2>
+            <p class="modal-desc">Configure your platform cookies to fetch the latest data.</p>
+            
+            <div class="platform-section">
+                <h3>Twitter/X Cookies</h3>
+                <div class="form-group">
+                    <label>auth_token</label>
+                    <input type="password" id="tw-token" placeholder="Paste auth_token here">
+                </div>
+                <div class="form-group">
+                    <label>ct0</label>
+                    <input type="password" id="tw-ct0" placeholder="Paste ct0 here">
+                </div>
+            </div>
+
+            <div class="platform-section">
+                <h3>LinkedIn Cookies</h3>
+                <div class="form-group">
+                    <label>li_at</label>
+                    <input type="password" id="li-at" placeholder="Paste li_at here">
+                </div>
+                <div class="form-group">
+                    <label>JSESSIONID</label>
+                    <input type="password" id="li-jsession" placeholder="Paste JSESSIONID here (e.g., ajax:123...)">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="close-modal-btn" class="btn secondary-btn">Cancel</button>
+                <button id="save-settings-btn" class="btn primary-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

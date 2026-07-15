@@ -1,0 +1,16 @@
+services:
+  agent-reach:
+    build: .
+    container_name: agent-reach-container
+    ports:
+      - "8080:10000" # Map localhost:8080 to FastAPI on port 10000
+    volumes:
+      # Mount your local code directory into the container
+      - .:/app
+      # Create a persistent volume for the agent-reach configs and cookies
+      - agent-reach-data:/root/.agent-reach
+    stdin_open: true # Equivalent to -i in docker run
+    tty: true        # Equivalent to -t in docker run
+
+volumes:
+  agent-reach-data:
