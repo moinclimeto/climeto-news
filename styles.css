@@ -111,21 +111,51 @@ body {
     transform: none;
 }
 
-.stats {
+.tabs {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
 }
 
-.stat-badge {
+.tab-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px 12px 0 0;
     font-weight: 600;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    font-size: 1rem;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
     background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    color: var(--text-primary);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
+    border-bottom: none;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--bg-card);
 }
 
 .twitter-badge .icon { color: var(--twitter-color); }
@@ -133,15 +163,23 @@ body {
 .youtube-badge .icon { color: var(--youtube-color); }
 
 .main-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 2rem;
+    display: block;
 }
 
 .column {
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 1.5rem;
+}
+
+.column.active {
+    display: flex;
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .column-header {

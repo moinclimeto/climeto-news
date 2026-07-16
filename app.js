@@ -47,6 +47,21 @@ async function loadSettings() {
 function setupEventListeners() {
     const modal = document.getElementById('settings-modal');
     
+    // Tab switching logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const columns = document.querySelectorAll('.column');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            columns.forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            const target = btn.getAttribute('data-target');
+            document.querySelector('.' + target).classList.add('active');
+        });
+    });
+    
     document.getElementById('settings-btn').addEventListener('click', () => {
         modal.classList.add('active');
     });
