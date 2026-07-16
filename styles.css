@@ -6,6 +6,7 @@
     --text-secondary: #94a3b8;
     --twitter-color: #1da1f2;
     --linkedin-color: #0077b5;
+    --youtube-color: #ff0000;
     --accent: #6366f1;
     --glass-blur: 12px;
 }
@@ -129,10 +130,11 @@ body {
 
 .twitter-badge .icon { color: var(--twitter-color); }
 .linkedin-badge .icon { color: var(--linkedin-color); font-weight: bold; }
+.youtube-badge .icon { color: var(--youtube-color); }
 
 .main-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 2rem;
 }
 
@@ -169,6 +171,11 @@ body {
 .linkedin-column .glow-line {
     background: var(--linkedin-color);
     box-shadow: 0 0 10px var(--linkedin-color);
+}
+
+.youtube-column .glow-line {
+    background: var(--youtube-color);
+    box-shadow: 0 0 10px var(--youtube-color);
 }
 
 .feed {

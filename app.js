@@ -15,12 +15,15 @@ async function fetchPosts() {
         
         const twitterPosts = data.data.filter(p => p.platform === 'twitter');
         const linkedinPosts = data.data.filter(p => p.platform === 'linkedin');
+        const youtubePosts = data.data.filter(p => p.platform === 'youtube');
         
         document.getElementById('tw-count').textContent = twitterPosts.length;
         document.getElementById('li-count').textContent = linkedinPosts.length;
+        document.getElementById('yt-count').textContent = youtubePosts.length;
         
         renderTwitter(twitterPosts);
         renderLinkedin(linkedinPosts);
+        renderYoutube(youtubePosts);
     } catch (error) {
         console.error("Error fetching posts", error);
         showToast("Error loading posts from database");
@@ -167,6 +170,46 @@ function renderLinkedin(posts) {
                 </div>
                 <div class="card-content">
                     ${linkify(post.text)}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderYoutube(posts) {
+    const container = document.getElementById('youtube-feed');
+    if (posts.length === 0) {
+        container.innerHTML = '<div class="no-data">No YouTube videos found in database.</div>';
+        return;
+    }
+
+    container.innerHTML = posts.map(post => {
+        const author = post.author || {};
+        
+        let mediaHtml = '';
+        if (post.media && post.media.length > 0) {
+            mediaHtml = `<div class="card-media"><img src="${post.media[0].url}" alt="Video thumbnail" loading="lazy"></div>`;
+        }
+
+        const date = new Date(post.createdAtISO).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        return `
+            <div class="card">
+                <div class="card-header">
+                    <img src="${author.profileImageUrl || ''}" class="avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%2394a3b8\\'%3E%3Cpath d=\\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\\'/%3E%3C/svg%3E'">
+                    <div class="author-info">
+                        <div class="author-name">${author.name || 'Unknown Channel'}</div>
+                        <div class="author-meta">${date !== 'Invalid Date' ? date : ''}</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    ${linkify(post.text || '')}
+                </div>
+                ${mediaHtml}
+                <div class="card-footer">
+                    <div class="stat"><span>👁</span> ${post.metrics?.views || '0 views'}</div>
                 </div>
             </div>
         `;

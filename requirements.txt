@@ -4,3 +4,5 @@ sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
 pydantic>=2.0.0
 linkedin-api>=2.0.0
+youtube-search-python>=1.6.6
+httpx<0.28.0

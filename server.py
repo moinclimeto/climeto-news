@@ -54,6 +54,20 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
                 "media": [{"type": "photo", "url": p.media_url}] if p.media_url else [],
                 "createdAtISO": p.created_at.isoformat() if p.created_at else None
             })
+        elif p.platform == 'youtube':
+            results.append({
+                "id": p.post_id,
+                "platform": "youtube",
+                "text": p.text,
+                "author": {
+                    "name": p.author_name,
+                    "channelUrl": p.author_handle,
+                    "profileImageUrl": p.author_avatar
+                },
+                "metrics": p.metrics or {},
+                "media": [{"type": "photo", "url": p.media_url}] if p.media_url else [],
+                "createdAtISO": p.created_at.isoformat() if p.created_at else None
+            })
         else: # linkedin
             results.append({
                 "id": p.post_id,
@@ -99,6 +113,8 @@ def run_fetch_scripts():
     subprocess.run(["python", "fetch_tweets.py"])
     print("Background Task: Running fetch_linkedin_india.py")
     subprocess.run(["python", "fetch_linkedin_india.py"])
+    print("Background Task: Running fetch_youtube.py")
+    subprocess.run(["python", "fetch_youtube.py"])
 
 @app.post("/api/fetch")
 def trigger_fetch(background_tasks: BackgroundTasks):
