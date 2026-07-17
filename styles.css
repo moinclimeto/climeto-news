@@ -7,6 +7,9 @@
     --twitter-color: #1da1f2;
     --linkedin-color: #0077b5;
     --youtube-color: #ff0000;
+    --reddit-color: #ff4500;
+    --news-color: #10b981;
+    --facebook-color: #1877f2;
     --accent: #6366f1;
     --glass-blur: 12px;
 }
@@ -214,6 +217,21 @@ body {
 .youtube-column .glow-line {
     background: var(--youtube-color);
     box-shadow: 0 0 10px var(--youtube-color);
+}
+
+.news-column .glow-line {
+    background: var(--news-color);
+    box-shadow: 0 0 10px var(--news-color);
+}
+
+.reddit-column .glow-line {
+    background: var(--reddit-color);
+    box-shadow: 0 0 10px var(--reddit-color);
+}
+
+.facebook-column .glow-line {
+    background: var(--facebook-color);
+    box-shadow: 0 0 10px var(--facebook-color);
 }
 
 .feed {

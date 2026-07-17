@@ -68,6 +68,48 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
                 "media": [{"type": "photo", "url": p.media_url}] if p.media_url else [],
                 "createdAtISO": p.created_at.isoformat() if p.created_at else None
             })
+        elif p.platform == 'reddit':
+            results.append({
+                "id": p.post_id,
+                "platform": "reddit",
+                "text": p.text,
+                "author": {
+                    "name": p.author_name,
+                    "screenName": p.author_handle,
+                    "profileImageUrl": p.author_avatar
+                },
+                "metrics": p.metrics or {},
+                "media": [{"type": "photo", "url": p.media_url}] if p.media_url else [],
+                "createdAtISO": p.created_at.isoformat() if p.created_at else None
+            })
+        elif p.platform == 'news':
+            results.append({
+                "id": p.post_id,
+                "platform": "news",
+                "text": p.text,
+                "author": {
+                    "name": p.author_name,
+                    "screenName": p.author_handle,
+                    "profileImageUrl": p.author_avatar
+                },
+                "metrics": p.metrics or {},
+                "media": [{"type": "photo", "url": p.media_url}] if p.media_url else [],
+                "createdAtISO": p.created_at.isoformat() if p.created_at else None
+            })
+        elif p.platform == 'facebook':
+            results.append({
+                "id": p.post_id,
+                "platform": "facebook",
+                "text": p.text,
+                "author": {
+                    "name": p.author_name,
+                    "screenName": p.author_handle,
+                    "profileImageUrl": p.author_avatar
+                },
+                "metrics": p.metrics or {},
+                "media": [{"type": "photo", "url": p.media_url}] if p.media_url else [],
+                "createdAtISO": p.created_at.isoformat() if p.created_at else None
+            })
         else: # linkedin
             results.append({
                 "id": p.post_id,
@@ -108,17 +150,29 @@ def get_settings(db: Session = Depends(get_db)):
     settings = db.query(Setting).all()
     return {s.key: s.value for s in settings}
 
-def run_fetch_scripts():
-    print("Background Task: Running fetch_tweets.py")
-    subprocess.run(["python", "fetch_tweets.py"])
-    print("Background Task: Running fetch_linkedin_india.py")
-    subprocess.run(["python", "fetch_linkedin_india.py"])
-    print("Background Task: Running fetch_youtube.py")
-    subprocess.run(["python", "fetch_youtube.py"])
+def run_fetch_scripts(platform: str = None):
+    if platform in [None, 'twitter']:
+        print("Background Task: Running fetch_tweets.py")
+        subprocess.run(["python", "fetch_tweets.py"])
+    if platform in [None, 'linkedin']:
+        print("Background Task: Running fetch_linkedin_india.py")
+        subprocess.run(["python", "fetch_linkedin_india.py"])
+    if platform in [None, 'youtube']:
+        print("Background Task: Running fetch_youtube.py")
+        subprocess.run(["python", "fetch_youtube.py"])
+    if platform in [None, 'news']:
+        print("Background Task: Running fetch_news.py")
+        subprocess.run(["python", "fetch_news.py"])
+    if platform in [None, 'reddit']:
+        print("Background Task: Running fetch_reddit.py")
+        subprocess.run(["python", "fetch_reddit.py"])
+    if platform in [None, 'facebook']:
+        print("Background Task: Running fetch_facebook.py")
+        subprocess.run(["python", "fetch_facebook.py"])
 
 @app.post("/api/fetch")
-def trigger_fetch(background_tasks: BackgroundTasks):
-    background_tasks.add_task(run_fetch_scripts)
+def trigger_fetch(background_tasks: BackgroundTasks, platform: str = None):
+    background_tasks.add_task(run_fetch_scripts, platform)
     return {"message": "Fetch started in background. The UI will update as data flows into the database."}
 
 # --- Static File Serving ---

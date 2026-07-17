@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
     <div id="toast" class="toast"></div>
@@ -19,9 +19,7 @@
                 <p class="subtitle">India Content Hub</p>
             </div>
             <div class="header-actions">
-                <button id="fetch-btn" class="btn primary-btn">
-                    <span class="btn-text">Fetch Latest Data</span>
-                </button>
+                <button id="fetch-btn" class="btn primary-btn">Fetch All Data</button>
                 <button id="settings-btn" class="btn secondary-btn">⚙️ Settings</button>
             </div>
         </header>
@@ -39,36 +37,70 @@
                 <span class="icon" style="color: var(--youtube-color);">▶</span>
                 <span id="yt-count">0</span> YouTube
             </button>
+            <button class="tab-btn" data-target="news-column">
+                <span class="icon" style="color: var(--news-color);">📰</span>
+                <span id="news-count">0</span> News
+            </button>
+            <button class="tab-btn" data-target="reddit-column">
+                <span class="icon" style="color: var(--reddit-color);">🤖</span>
+                <span id="rdt-count">0</span> Reddit
+            </button>
+            <button class="tab-btn" data-target="facebook-column">
+                <span class="icon" style="color: var(--facebook-color);">f</span>
+                <span id="fb-count">0</span> Facebook
+            </button>
         </div>
 
         <main class="main-content">
             <div class="column twitter-column active">
                 <div class="column-header">
-                    <h2>Twitter Pulse</h2>
-                    <div class="glow-line"></div>
+                    <h2><span class="icon">🐦</span> Twitter <span class="badge" id="tw-count">0</span></h2>
+                    <button class="btn secondary-btn fetch-single-btn" data-platform="twitter">Fetch Twitter</button>
                 </div>
-                <div id="twitter-feed" class="feed">
-                    <div class="loading">Loading Twitter Data...</div>
-                </div>
+                <div class="feed" id="twitter-feed"></div>
             </div>
 
             <div class="column linkedin-column">
                 <div class="column-header">
-                    <h2>LinkedIn Insights</h2>
-                    <div class="glow-line"></div>
+                    <h2><span class="icon">💼</span> LinkedIn <span class="badge" id="li-count">0</span></h2>
+                    <button class="btn secondary-btn fetch-single-btn" data-platform="linkedin">Fetch LinkedIn</button>
                 </div>
-                <div id="linkedin-feed" class="feed">
-                    <div class="loading">Loading LinkedIn Data...</div>
-                </div>
+                <div class="feed" id="linkedin-feed"></div>
             </div>
 
             <div class="column youtube-column">
                 <div class="column-header">
-                    <h2>YouTube Trending</h2>
-                    <div class="glow-line"></div>
+                    <h2><span class="icon">▶️</span> YouTube <span class="badge" id="yt-count">0</span></h2>
+                    <button class="btn secondary-btn fetch-single-btn" data-platform="youtube">Fetch YouTube</button>
                 </div>
-                <div id="youtube-feed" class="feed">
-                    <div class="loading">Loading YouTube Data...</div>
+                <div class="feed" id="youtube-feed"></div>
+            </div>
+
+            <div class="column news-column">
+                <div class="column-header">
+                    <h2><span class="icon">📰</span> News <span class="badge" id="news-count">0</span></h2>
+                    <button class="btn secondary-btn fetch-single-btn" data-platform="news">Fetch News</button>
+                </div>
+                <div class="feed" id="news-feed"></div>
+            </div>
+
+            <div class="column reddit-column">
+                <div class="column-header">
+                    <h2><span class="icon">🤖</span> Reddit <span class="badge" id="rdt-count">0</span></h2>
+                    <button class="btn secondary-btn fetch-single-btn" data-platform="reddit">Fetch Reddit</button>
+                </div>
+                <div class="feed" id="reddit-feed">
+                    <div class="loading">Loading Reddit Data...</div>
+                </div>
+            </div>
+
+            <div class="column facebook-column">
+                <div class="column-header">
+                    <h2><span class="icon">🟦</span> Facebook <span class="badge" id="fb-count">0</span></h2>
+                    <button class="btn secondary-btn fetch-single-btn" data-platform="facebook">Fetch Facebook</button>
+                </div>
+                <div class="feed" id="facebook-feed">
+                    <div class="loading">Loading Facebook Data...</div>
                 </div>
             </div>
         </main>
@@ -103,7 +135,22 @@
                     <input type="password" id="li-jsession" placeholder="Paste JSESSIONID here (e.g., ajax:123...)">
                 </div>
             </div>
-
+            
+            <div class="settings-group">
+                <h3>Facebook Authentication</h3>
+                <p class="settings-help">Required for fetching Facebook posts</p>
+                
+                <div class="form-group">
+                    <label for="fb-c-user">c_user (User ID)</label>
+                    <input type="text" id="fb-c-user" placeholder="Enter c_user cookie value">
+                </div>
+                
+                <div class="form-group">
+                    <label for="fb-xs">xs (Session Token)</label>
+                    <input type="text" id="fb-xs" placeholder="Enter xs cookie value">
+                </div>
+            </div>
+            
             <div class="modal-actions">
                 <button id="close-modal-btn" class="btn secondary-btn">Cancel</button>
                 <button id="save-settings-btn" class="btn primary-btn">Save Settings</button>
@@ -111,6 +158,19 @@
         </div>
     </div>
     
-    <script src="app.js?v=2"></script>
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <h2 style="margin-bottom: 10px;">Are you sure?</h2>
+            <p class="modal-desc" id="confirm-msg" style="margin-bottom: 20px; white-space: pre-wrap; font-size: 16px;"></p>
+            
+            <div class="modal-actions" style="justify-content: center; gap: 15px;">
+                <button id="confirm-cancel-btn" class="btn secondary-btn" style="min-width: 120px;">Cancel</button>
+                <button id="confirm-proceed-btn" class="btn primary-btn" style="min-width: 120px;">Proceed</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js?v=7"></script>
 </body>
 </html>

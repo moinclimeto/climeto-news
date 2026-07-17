@@ -11,6 +11,10 @@ services:
       - agent-reach-data:/root/.agent-reach
     stdin_open: true # Equivalent to -i in docker run
     tty: true        # Equivalent to -t in docker run
+    environment:
+      - FACEBOOK_COOKIES_FILE=/app/facebook_cookies.txt
+      - REDDIT_CLIENT_ID=
+      - REDDIT_CLIENT_SECRET=
 
 volumes:
   agent-reach-data:
