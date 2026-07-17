@@ -46,6 +46,7 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
             results.append({
                 "id": p.post_id,
                 "platform": "twitter",
+                "keyword": p.keyword,
                 "text": p.text,
                 "author": {
                     "name": p.author_name,
@@ -60,6 +61,7 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
             results.append({
                 "id": p.post_id,
                 "platform": "youtube",
+                "keyword": p.keyword,
                 "text": p.text,
                 "author": {
                     "name": p.author_name,
@@ -74,6 +76,7 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
             results.append({
                 "id": p.post_id,
                 "platform": "reddit",
+                "keyword": p.keyword,
                 "text": p.text,
                 "author": {
                     "name": p.author_name,
@@ -88,6 +91,7 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
             results.append({
                 "id": p.post_id,
                 "platform": "news",
+                "keyword": p.keyword,
                 "text": p.text,
                 "author": {
                     "name": p.author_name,
@@ -102,6 +106,7 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
             results.append({
                 "id": p.post_id,
                 "platform": "facebook",
+                "keyword": p.keyword,
                 "text": p.text,
                 "author": {
                     "name": p.author_name,
@@ -116,9 +121,11 @@ def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
             results.append({
                 "id": p.post_id,
                 "platform": "linkedin",
+                "keyword": p.keyword,
                 "companyName": p.author_name,
                 "bio": p.author_handle,
-                "text": p.text
+                "text": p.text,
+                "createdAtISO": p.created_at.isoformat() if p.created_at else None
             })
             
     return {"data": results}

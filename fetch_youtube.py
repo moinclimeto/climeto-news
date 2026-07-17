@@ -1,7 +1,8 @@
 import time
 import os
 import json
-from datetime import datetime
+import re
+from datetime import datetime, timedelta
 from youtubesearchpython import VideosSearch
 from database import SessionLocal, Post
 
@@ -28,6 +29,35 @@ KEYWORDS = [
     "Environmental Compliance",
     "Climate Tech"
 ]
+
+def parse_relative_time(time_str):
+    if not time_str:
+        return datetime.utcnow()
+    
+    match = re.search(r'(\d+)\s+(second|minute|hour|day|week|month|year)s?\s+ago', time_str.lower())
+    if match:
+        amount = int(match.group(1))
+        unit = match.group(2)
+        
+        if unit == 'second':
+            delta = timedelta(seconds=amount)
+        elif unit == 'minute':
+            delta = timedelta(minutes=amount)
+        elif unit == 'hour':
+            delta = timedelta(hours=amount)
+        elif unit == 'day':
+            delta = timedelta(days=amount)
+        elif unit == 'week':
+            delta = timedelta(weeks=amount)
+        elif unit == 'month':
+            delta = timedelta(days=amount * 30)
+        elif unit == 'year':
+            delta = timedelta(days=amount * 365)
+        else:
+            delta = timedelta(0)
+            
+        return datetime.utcnow() - delta
+    return datetime.utcnow()
 
 def fetch_youtube_for_keyword(keyword):
     print(f"🔍 Searching YouTube videos for: {keyword} in India...")
@@ -73,6 +103,9 @@ def main():
                 
                 text = f"{video.get('title', '')} \n{video.get('link', '')}"
                 
+                published_time = video.get('publishedTime', '')
+                created_at = parse_relative_time(published_time)
+                
                 new_post = Post(
                     platform="youtube",
                     keyword=keyword,
@@ -83,7 +116,7 @@ def main():
                     text=text,
                     media_url=media_url,
                     metrics={"views": view_count},
-                    created_at=datetime.utcnow() 
+                    created_at=created_at
                 )
                 db.add(new_post)
                 seen_ids.add(post_id)

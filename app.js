@@ -8,35 +8,117 @@ async function init() {
     await loadSettings();
 }
 
+let allPosts = [];
+const activeFilters = {
+    twitter: new Set(),
+    linkedin: new Set(),
+    youtube: new Set(),
+    news: new Set(),
+    reddit: new Set(),
+    facebook: new Set()
+};
+
 async function fetchPosts() {
     try {
         const response = await fetch('/api/posts');
         const data = await response.json();
         
-        const twitterPosts = data.data.filter(p => p.platform === 'twitter');
-        const linkedinPosts = data.data.filter(p => p.platform === 'linkedin');
-        const youtubePosts = data.data.filter(p => p.platform === 'youtube');
-        const newsPosts = data.data.filter(p => p.platform === 'news');
-        const redditPosts = data.data.filter(p => p.platform === 'reddit');
-        const facebookPosts = data.data.filter(p => p.platform === 'facebook');
-        
-        document.getElementById('tw-count').textContent = twitterPosts.length;
-        document.getElementById('li-count').textContent = linkedinPosts.length;
-        document.getElementById('yt-count').textContent = youtubePosts.length;
-        document.getElementById('news-count').textContent = newsPosts.length;
-        document.getElementById('rdt-count').textContent = redditPosts.length;
-        document.getElementById('fb-count').textContent = facebookPosts.length;
-        
-        renderTwitter(twitterPosts);
-        renderLinkedin(linkedinPosts);
-        renderYoutube(youtubePosts);
-        renderNews(newsPosts);
-        renderReddit(redditPosts);
-        renderFacebook(facebookPosts);
+        allPosts = data.data;
+        updateUI();
     } catch (error) {
         console.error("Error fetching posts", error);
         showToast("Error loading posts from database");
     }
+}
+
+function getPrefix(plat) {
+    if (plat === 'twitter') return 'tw';
+    if (plat === 'linkedin') return 'li';
+    if (plat === 'youtube') return 'yt';
+    if (plat === 'reddit') return 'rdt';
+    if (plat === 'facebook') return 'fb';
+    return 'news';
+}
+
+function updateUI() {
+    const platforms = ['twitter', 'linkedin', 'youtube', 'news', 'reddit', 'facebook'];
+    platforms.forEach(plat => {
+        let platformPosts = allPosts.filter(p => p.platform === plat);
+        setupFilterBar(plat, platformPosts);
+        
+        const selected = activeFilters[plat];
+        if (selected.size > 0) {
+            platformPosts = platformPosts.filter(p => p.keyword && selected.has(p.keyword));
+        }
+        
+        // Ensure posts are strictly sorted by newest first
+        platformPosts.sort((a, b) => new Date(b.createdAtISO || 0) - new Date(a.createdAtISO || 0));
+        
+        document.getElementById(`${getPrefix(plat)}-count`).textContent = platformPosts.length;
+        
+        if (plat === 'twitter') renderTwitter(platformPosts);
+        else if (plat === 'linkedin') renderLinkedin(platformPosts);
+        else if (plat === 'youtube') renderYoutube(platformPosts);
+        else if (plat === 'news') renderNews(platformPosts);
+        else if (plat === 'reddit') renderReddit(platformPosts);
+        else if (plat === 'facebook') renderFacebook(platformPosts);
+    });
+}
+
+function updatePlatformFeed(platform) {
+    let platformPosts = allPosts.filter(p => p.platform === platform);
+    const selected = activeFilters[platform];
+    if (selected.size > 0) {
+        platformPosts = platformPosts.filter(p => p.keyword && selected.has(p.keyword));
+    }
+    
+    // Ensure posts are strictly sorted by newest first
+    platformPosts.sort((a, b) => new Date(b.createdAtISO || 0) - new Date(a.createdAtISO || 0));
+    
+    document.getElementById(`${getPrefix(platform)}-count`).textContent = platformPosts.length;
+    
+    if (platform === 'twitter') renderTwitter(platformPosts);
+    else if (platform === 'linkedin') renderLinkedin(platformPosts);
+    else if (platform === 'youtube') renderYoutube(platformPosts);
+    else if (platform === 'news') renderNews(platformPosts);
+    else if (platform === 'reddit') renderReddit(platformPosts);
+    else if (platform === 'facebook') renderFacebook(platformPosts);
+}
+
+function setupFilterBar(platform, posts) {
+    const filterBar = document.getElementById(`${platform}-filter-bar`);
+    if (!filterBar) return;
+    
+    const keywords = new Set();
+    posts.forEach(p => { if (p.keyword) keywords.add(p.keyword); });
+    
+    if (keywords.size === 0) {
+        filterBar.innerHTML = '';
+        return;
+    }
+    
+    filterBar.innerHTML = '';
+    const selected = activeFilters[platform];
+    
+    keywords.forEach(kw => {
+        const chip = document.createElement('div');
+        chip.className = 'filter-chip';
+        if (selected.has(kw)) chip.classList.add('active');
+        chip.textContent = kw;
+        
+        chip.addEventListener('click', () => {
+            if (selected.has(kw)) {
+                selected.delete(kw);
+                chip.classList.remove('active');
+            } else {
+                selected.add(kw);
+                chip.classList.add('active');
+            }
+            updatePlatformFeed(platform);
+        });
+        
+        filterBar.appendChild(chip);
+    });
 }
 
 async function loadSettings() {

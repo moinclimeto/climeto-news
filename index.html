@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
     <div id="toast" class="toast"></div>
@@ -57,6 +57,7 @@
                     <h2><span class="icon">🐦</span> Twitter <span class="badge" id="tw-count">0</span></h2>
                     <button class="btn secondary-btn fetch-single-btn" data-platform="twitter">Fetch Twitter</button>
                 </div>
+                <div class="filter-bar" id="twitter-filter-bar"></div>
                 <div class="feed" id="twitter-feed"></div>
             </div>
 
@@ -65,6 +66,7 @@
                     <h2><span class="icon">💼</span> LinkedIn <span class="badge" id="li-count">0</span></h2>
                     <button class="btn secondary-btn fetch-single-btn" data-platform="linkedin">Fetch LinkedIn</button>
                 </div>
+                <div class="filter-bar" id="linkedin-filter-bar"></div>
                 <div class="feed" id="linkedin-feed"></div>
             </div>
 
@@ -73,6 +75,7 @@
                     <h2><span class="icon">▶️</span> YouTube <span class="badge" id="yt-count">0</span></h2>
                     <button class="btn secondary-btn fetch-single-btn" data-platform="youtube">Fetch YouTube</button>
                 </div>
+                <div class="filter-bar" id="youtube-filter-bar"></div>
                 <div class="feed" id="youtube-feed"></div>
             </div>
 
@@ -81,6 +84,7 @@
                     <h2><span class="icon">📰</span> News <span class="badge" id="news-count">0</span></h2>
                     <button class="btn secondary-btn fetch-single-btn" data-platform="news">Fetch News</button>
                 </div>
+                <div class="filter-bar" id="news-filter-bar"></div>
                 <div class="feed" id="news-feed"></div>
             </div>
 
@@ -89,6 +93,7 @@
                     <h2><span class="icon">🤖</span> Reddit <span class="badge" id="rdt-count">0</span></h2>
                     <button class="btn secondary-btn fetch-single-btn" data-platform="reddit">Fetch Reddit</button>
                 </div>
+                <div class="filter-bar" id="reddit-filter-bar"></div>
                 <div class="feed" id="reddit-feed">
                     <div class="loading">Loading Reddit Data...</div>
                 </div>
@@ -99,6 +104,7 @@
                     <h2><span class="icon">🟦</span> Facebook <span class="badge" id="fb-count">0</span></h2>
                     <button class="btn secondary-btn fetch-single-btn" data-platform="facebook">Fetch Facebook</button>
                 </div>
+                <div class="filter-bar" id="facebook-filter-bar"></div>
                 <div class="feed" id="facebook-feed">
                     <div class="loading">Loading Facebook Data...</div>
                 </div>
@@ -171,6 +177,6 @@
         </div>
     </div>
     
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=10"></script>
 </body>
 </html>
