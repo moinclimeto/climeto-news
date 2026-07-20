@@ -60,7 +60,6 @@ def main():
                     continue
                 existing_post = db.query(Post).filter(Post.post_id == post_id).first()
                 if existing_post:
-                    from datetime import datetime
                     existing_post.fetched_at = datetime.utcnow()
                     continue
                 
