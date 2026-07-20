@@ -58,7 +58,10 @@ def main():
                 post_id = f"news_{entry.get('id', entry.get('link', ''))}"
                 if post_id in seen_ids:
                     continue
-                if db.query(Post).filter(Post.post_id == post_id).first():
+                existing_post = db.query(Post).filter(Post.post_id == post_id).first()
+                if existing_post:
+                    from datetime import datetime
+                    existing_post.fetched_at = datetime.utcnow()
                     continue
                 
                 try:

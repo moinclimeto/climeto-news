@@ -145,7 +145,9 @@ def main():
                     if post_hash in seen_ids:
                         continue
                     
-                    if db.query(Post).filter(Post.post_id == post_hash).first():
+                    existing_post = db.query(Post).filter(Post.post_id == post_hash).first()
+                    if existing_post:
+                        existing_post.fetched_at = datetime.utcnow()
                         continue
                         
                     new_post = Post(

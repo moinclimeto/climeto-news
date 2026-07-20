@@ -32,11 +32,11 @@ class SettingsRequest(BaseModel):
 @app.get("/api/posts")
 def get_posts(platform: Optional[str] = None, db: Session = Depends(get_db)):
     if platform:
-        posts = db.query(Post).filter(Post.platform == platform).order_by(Post.created_at.desc()).limit(100).all()
+        posts = db.query(Post).filter(Post.platform == platform).order_by(Post.fetched_at.desc(), Post.created_at.desc()).limit(100).all()
     else:
         posts = []
         for plat in ['twitter', 'linkedin', 'youtube', 'news', 'reddit', 'facebook']:
-            plat_posts = db.query(Post).filter(Post.platform == plat).order_by(Post.created_at.desc()).limit(50).all()
+            plat_posts = db.query(Post).filter(Post.platform == plat).order_by(Post.fetched_at.desc(), Post.created_at.desc()).limit(50).all()
             posts.extend(plat_posts)
     
     # Format to match the frontend expectations

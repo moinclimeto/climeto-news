@@ -92,7 +92,10 @@ def main():
                 post_id = f"yt_{video.get('id')}"
                 if post_id in seen_ids:
                     continue
-                if db.query(Post).filter(Post.post_id == post_id).first():
+                existing_post = db.query(Post).filter(Post.post_id == post_id).first()
+                if existing_post:
+                    from datetime import datetime
+                    existing_post.fetched_at = datetime.utcnow()
                     continue
                 
                 thumbnails = video.get('thumbnails', [])

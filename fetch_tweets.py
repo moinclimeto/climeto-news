@@ -8,15 +8,34 @@ from datetime import datetime
 # Fix PATH for docker exec to find pipx installations
 os.environ["PATH"] = f"/root/.local/bin:{os.environ.get('PATH', '')}"
 
-# Load twitter cookies from Agent Reach config
-CONFIG_FILE = "/root/.agent-reach/config.yaml"
-try:
-    with open(CONFIG_FILE, "r") as f:
-        config = yaml.safe_load(f)
-        os.environ["TWITTER_AUTH_TOKEN"] = config.get("twitter_auth_token", "")
-        os.environ["TWITTER_CT0"] = config.get("twitter_ct0", "")
-except Exception as e:
-    print(f"⚠️ Could not load Agent Reach config: {e}")
+from database import SessionLocal, Setting
+
+def load_twitter_cookies():
+    # Load from DB if available
+    try:
+        db = SessionLocal()
+        auth_token = db.query(Setting).filter(Setting.key == 'twitter_auth_token').first()
+        ct0 = db.query(Setting).filter(Setting.key == 'twitter_ct0').first()
+        if auth_token and ct0 and auth_token.value and ct0.value:
+            os.environ["TWITTER_AUTH_TOKEN"] = auth_token.value
+            os.environ["TWITTER_CT0"] = ct0.value
+        db.close()
+    except Exception as e:
+        pass
+
+    # Fallback to config file if still missing
+    if not os.environ.get("TWITTER_AUTH_TOKEN"):
+        CONFIG_FILE = "/root/.agent-reach/config.yaml"
+        if os.path.exists(CONFIG_FILE):
+            try:
+                with open(CONFIG_FILE, "r") as f:
+                    config = yaml.safe_load(f)
+                    os.environ["TWITTER_AUTH_TOKEN"] = config.get("twitter_auth_token", "")
+                    os.environ["TWITTER_CT0"] = config.get("twitter_ct0", "")
+            except Exception as e:
+                print(f"⚠️ Could not load Agent Reach config: {e}")
+
+load_twitter_cookies()
 
 # Aapke saare keywords yahan hain
 KEYWORDS = [
@@ -100,7 +119,10 @@ def main():
                 post_id = str(tweet.get("id"))
                 if post_id in seen_ids:
                     continue
-                if db.query(Post).filter(Post.post_id == post_id).first():
+                existing_post = db.query(Post).filter(Post.post_id == post_id).first()
+                if existing_post:
+                    from datetime import datetime
+                    existing_post.fetched_at = datetime.utcnow()
                     continue
                 
                 media_url = ""

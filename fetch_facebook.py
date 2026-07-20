@@ -89,7 +89,10 @@ def main():
                 post_id = f"fb_{post.get('post_id')}"
                 if post_id in seen_ids:
                     continue
-                if db.query(Post).filter(Post.post_id == post_id).first():
+                existing_post = db.query(Post).filter(Post.post_id == post_id).first()
+                if existing_post:
+                    from datetime import datetime
+                    existing_post.fetched_at = datetime.utcnow()
                     continue
                 
                 dt = post.get('time', datetime.utcnow())
