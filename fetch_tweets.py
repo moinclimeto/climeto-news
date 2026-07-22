@@ -37,7 +37,8 @@ def load_twitter_cookies():
 
 load_twitter_cookies()
 
-from ntscraper import Nitter
+import os
+from tweety import Twitter
 
 # Aapke saare keywords yahan hain
 KEYWORDS = [
@@ -64,37 +65,33 @@ KEYWORDS = [
     "Climate Tech"
 ]
 
-def fetch_tweets_for_keyword(keyword):
+def fetch_tweets_for_keyword(keyword, app):
     print(f"🔍 Searching tweets for: {keyword} in India...")
     try:
-        scraper = Nitter(log_level=1, skip_instance_check=False)
         search_query = f'"{keyword}" (India OR Indian OR Delhi OR Mumbai)'
         
-        # Get tweets using ntscraper
-        tweets_data = scraper.get_tweets(search_query, mode='term', number=10)
+        # Search using Tweety-ns
+        tweets = app.search(search_query, pages=1)
         
-        if tweets_data and 'tweets' in tweets_data:
-            formatted_tweets = []
-            for tweet in tweets_data['tweets']:
-                # Format to match your expected dictionary structure
-                formatted_tweets.append({
-                    "id": tweet.get("link", "").split("/")[-1] if "link" in tweet else str(hash(tweet.get("text", ""))),
-                    "text": tweet.get("text", ""),
-                    "createdAtISO": tweet.get("date", ""),
-                    "author": {
-                        "name": tweet.get("user", {}).get("name", ""),
-                        "screenName": tweet.get("user", {}).get("username", ""),
-                        "profileImageUrl": tweet.get("user", {}).get("avatar", "")
-                    },
-                    "media": [{"type": "photo", "url": pic} for pic in tweet.get("pictures", [])],
-                    "metrics": {
-                        "likeCount": tweet.get("stats", {}).get("likes", 0),
-                        "retweetCount": tweet.get("stats", {}).get("retweets", 0),
-                        "replyCount": tweet.get("stats", {}).get("comments", 0)
-                    }
-                })
-            return formatted_tweets
-        return None
+        formatted_tweets = []
+        for tweet in tweets:
+            formatted_tweets.append({
+                "id": str(tweet.id),
+                "text": tweet.text,
+                "createdAtISO": str(tweet.created_on),
+                "author": {
+                    "name": tweet.author.name if tweet.author else "",
+                    "screenName": tweet.author.username if tweet.author else "",
+                    "profileImageUrl": tweet.author.profile_image_url_https if tweet.author else ""
+                },
+                "media": [{"type": "photo", "url": pic.media_url_https} for pic in tweet.media if pic.type == "photo"],
+                "metrics": {
+                    "likeCount": tweet.likes,
+                    "retweetCount": tweet.retweet_counts,
+                    "replyCount": tweet.replies
+                }
+            })
+        return formatted_tweets
     except Exception as e:
         print(f"❌ Exception for {keyword}: {e}")
         return None
@@ -105,10 +102,21 @@ def main():
     
     print(f"🚀 Starting Twitter Monitor. Results will be saved as JSON to {output_filename}\n")
     
+    # Initialize Tweety and start session using your configured cookies
+    app = Twitter("session")
+    auth_token = os.environ.get("TWITTER_AUTH_TOKEN")
+    ct0 = os.environ.get("TWITTER_CT0")
+    
+    if auth_token and ct0:
+        # Load cookies explicitly
+        app.load_cookies(f"auth_token={auth_token}; ct0={ct0}")
+    else:
+        print("⚠️ Warning: No TWITTER_AUTH_TOKEN or TWITTER_CT0 found. Search might fail or be limited.")
+
     all_data = {}
     
     for keyword in KEYWORDS:
-        data = fetch_tweets_for_keyword(keyword)
+        data = fetch_tweets_for_keyword(keyword, app)
         if data:
             all_data[keyword] = data
             print(f"✅ Found {len(data) if isinstance(data, list) else 'some'} records for {keyword}")
