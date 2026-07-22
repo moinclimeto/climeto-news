@@ -20,14 +20,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Playwright dependencies and browsers
+RUN playwright install --with-deps chromium
+
 # Copy the local project files to the container
 COPY . /app
 
 # Install agent-reach from the source
 RUN pip install --no-cache-dir -e .
-
-# Pre-install twitter-cli using pipx (used by fetch_tweets.py)
-RUN pipx install twitter-cli
 
 # Expose the default port (Render will override with $PORT)
 EXPOSE 10000
