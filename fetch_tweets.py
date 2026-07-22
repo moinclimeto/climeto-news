@@ -37,6 +37,8 @@ def load_twitter_cookies():
 
 load_twitter_cookies()
 
+from ntscraper import Nitter
+
 # Aapke saare keywords yahan hain
 KEYWORDS = [
     "Extended Producer Responsibility",
@@ -65,29 +67,36 @@ KEYWORDS = [
 def fetch_tweets_for_keyword(keyword):
     print(f"🔍 Searching tweets for: {keyword} in India...")
     try:
-        # Append 'India' to the search query to restrict results
+        scraper = Nitter(log_level=1, skip_instance_check=False)
         search_query = f'"{keyword}" (India OR Indian OR Delhi OR Mumbai)'
-        result = subprocess.run(
-            ["twitter", "search", search_query], 
-            capture_output=True, 
-            text=True
-        )
-        if result.returncode == 0:
-            # The CLI returns YAML text, so we parse it to a dictionary
-            try:
-                parsed_yaml = yaml.safe_load(result.stdout)
-                # The actual tweets are under the "data" key
-                if isinstance(parsed_yaml, dict) and "data" in parsed_yaml:
-                    return parsed_yaml["data"]
-                return parsed_yaml
-            except Exception as parse_error:
-                print(f"⚠️ Error parsing YAML for {keyword}: {parse_error}")
-                return None
-        else:
-            print(f"⚠️ Error fetching {keyword}: {result.stderr}")
-            return None
+        
+        # Get tweets using ntscraper
+        tweets_data = scraper.get_tweets(search_query, mode='term', number=10)
+        
+        if tweets_data and 'tweets' in tweets_data:
+            formatted_tweets = []
+            for tweet in tweets_data['tweets']:
+                # Format to match your expected dictionary structure
+                formatted_tweets.append({
+                    "id": tweet.get("link", "").split("/")[-1] if "link" in tweet else str(hash(tweet.get("text", ""))),
+                    "text": tweet.get("text", ""),
+                    "createdAtISO": tweet.get("date", ""),
+                    "author": {
+                        "name": tweet.get("user", {}).get("name", ""),
+                        "screenName": tweet.get("user", {}).get("username", ""),
+                        "profileImageUrl": tweet.get("user", {}).get("avatar", "")
+                    },
+                    "media": [{"type": "photo", "url": pic} for pic in tweet.get("pictures", [])],
+                    "metrics": {
+                        "likeCount": tweet.get("stats", {}).get("likes", 0),
+                        "retweetCount": tweet.get("stats", {}).get("retweets", 0),
+                        "replyCount": tweet.get("stats", {}).get("comments", 0)
+                    }
+                })
+            return formatted_tweets
+        return None
     except Exception as e:
-        print(f"❌ Exception: {e}")
+        print(f"❌ Exception for {keyword}: {e}")
         return None
 
 def main():
