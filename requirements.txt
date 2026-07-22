@@ -11,4 +11,4 @@ praw>=7.7.1
 facebook-scraper>=0.2.59
 lxml<6.0.0
 lxml_html_clean==0.1.1
-playwright>=1.40.0
+https://github.com/mahrtayyab/tweety/archive/main.zip
