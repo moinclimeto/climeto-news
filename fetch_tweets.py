@@ -1,14 +1,14 @@
-import subprocess
-import time
+import asyncio
 import os
 import yaml
 import json
+import time
 from datetime import datetime
 
 # Fix PATH for docker exec to find pipx installations
 os.environ["PATH"] = f"/root/.local/bin:{os.environ.get('PATH', '')}"
 
-from database import SessionLocal, Setting
+from database import SessionLocal, Setting, Post
 
 def load_twitter_cookies():
     # Load from DB if available
@@ -37,8 +37,7 @@ def load_twitter_cookies():
 
 load_twitter_cookies()
 
-import os
-from tweety import Twitter
+from twscrape import API, gather
 
 # Aapke saare keywords yahan hain
 KEYWORDS = [
@@ -65,30 +64,30 @@ KEYWORDS = [
     "Climate Tech"
 ]
 
-def fetch_tweets_for_keyword(keyword, app):
+async def fetch_tweets_for_keyword(keyword, api: API):
     print(f"🔍 Searching tweets for: {keyword} in India...")
     try:
         search_query = f'"{keyword}" (India OR Indian OR Delhi OR Mumbai)'
         
-        # Search using Tweety-ns
-        tweets = app.search(search_query, pages=1)
+        # Search using twscrape
+        tweets = await gather(api.search(search_query, limit=20))
         
         formatted_tweets = []
         for tweet in tweets:
             formatted_tweets.append({
                 "id": str(tweet.id),
-                "text": tweet.text,
-                "createdAtISO": str(tweet.created_on),
+                "text": tweet.rawContent,
+                "createdAtISO": str(tweet.date),
                 "author": {
-                    "name": tweet.author.name if tweet.author else "",
-                    "screenName": tweet.author.username if tweet.author else "",
-                    "profileImageUrl": tweet.author.profile_image_url_https if tweet.author else ""
+                    "name": tweet.user.displayname if tweet.user else "",
+                    "screenName": tweet.user.username if tweet.user else "",
+                    "profileImageUrl": tweet.user.profileImageUrl if tweet.user else ""
                 },
-                "media": [{"type": "photo", "url": pic.media_url_https} for pic in tweet.media if pic.type == "photo"],
+                "media": [{"type": "photo", "url": pic.url} for pic in tweet.media.photos] if getattr(tweet.media, 'photos', None) else [],
                 "metrics": {
-                    "likeCount": tweet.likes,
-                    "retweetCount": tweet.retweet_counts,
-                    "replyCount": tweet.replies
+                    "likeCount": tweet.likeCount,
+                    "retweetCount": tweet.retweetCount,
+                    "replyCount": tweet.replyCount
                 }
             })
         return formatted_tweets
@@ -96,36 +95,37 @@ def fetch_tweets_for_keyword(keyword, app):
         print(f"❌ Exception for {keyword}: {e}")
         return None
 
-def main():
+async def main():
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     output_filename = "twitter_report_latest.json"
     
     print(f"🚀 Starting Twitter Monitor. Results will be saved as JSON to {output_filename}\n")
     
-    # Initialize Tweety and start session using your configured cookies
-    app = Twitter("session")
+    api = API()
     auth_token = os.environ.get("TWITTER_AUTH_TOKEN")
     ct0 = os.environ.get("TWITTER_CT0")
     
     if auth_token and ct0:
-        # Load cookies explicitly
-        app.load_cookies(f"auth_token={auth_token}; ct0={ct0}")
+        # Ensure account is added
+        accounts = await api.pool.accounts_info()
+        if not any(a.username == "app_account" for a in accounts):
+            cookies_str = f"auth_token={auth_token}; ct0={ct0}"
+            await api.pool.add_account("app_account", "password", "email@test.com", "email_password", cookies=cookies_str)
+            await api.pool.login_all()
     else:
         print("⚠️ Warning: No TWITTER_AUTH_TOKEN or TWITTER_CT0 found. Search might fail or be limited.")
 
     all_data = {}
     
     for keyword in KEYWORDS:
-        data = fetch_tweets_for_keyword(keyword, app)
+        data = await fetch_tweets_for_keyword(keyword, api)
         if data:
             all_data[keyword] = data
             print(f"✅ Found {len(data) if isinstance(data, list) else 'some'} records for {keyword}")
         
         # Har search ke baad wait
-        time.sleep(3) 
+        await asyncio.sleep(3) 
             
-    from database import SessionLocal, Post
-    
     db = SessionLocal()
     try:
         seen_ids = set()
@@ -177,4 +177,4 @@ def main():
         db.close()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
