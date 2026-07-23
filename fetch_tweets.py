@@ -108,7 +108,7 @@ async def main():
     if auth_token and ct0:
         # Ensure account is added
         accounts = await api.pool.accounts_info()
-        if not any(a.username == "app_account" for a in accounts):
+        if not any(a.get("username") == "app_account" for a in accounts):
             cookies_str = f"auth_token={auth_token}; ct0={ct0}"
             await api.pool.add_account("app_account", "password", "email@test.com", "email_password", cookies=cookies_str)
             await api.pool.login_all()
